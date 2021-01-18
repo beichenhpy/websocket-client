@@ -10,7 +10,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description TODO 线程池
  * @since 2021/1/18 9:22
  */
 @Configuration

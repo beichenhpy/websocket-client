@@ -9,7 +9,7 @@ import java.net.URISyntaxException;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description TODO 配置websocket server uri
  * @since 2021/1/15 15:34
  */
 @Configuration

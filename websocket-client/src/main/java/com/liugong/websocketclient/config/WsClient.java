@@ -17,11 +17,10 @@ import java.net.URI;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description TODO websocket客户端 单例有问题，改为多例
  * @since 2021/1/15 15:28
  */
 @Component
-@Scope("prototype")
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
 
