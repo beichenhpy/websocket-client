@@ -1,10 +1,13 @@
 package com.liugong.websocketclient.config;
 
+import com.liugong.websocketclient.heartbeat.HeartThread;
 import com.liugong.websocketclient.utils.SpringContextUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
+
+import javax.annotation.Resource;
 
 /**
  * @author beichenhpy
@@ -16,29 +19,12 @@ import org.springframework.stereotype.Component;
 public class AfterBoot implements ApplicationRunner {
 
     WsClient wsClient;
-
-
+    @Resource(name = "taskExecutor")
+    private TaskExecutor taskExecutor;
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         wsClient= (WsClient) SpringContextUtils.getBean("wsClient");
         wsClient.connect();
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    if (wsClient.isClosed()){
-                        System.out.println("----------?do reconnect");
-                        System.out.println(wsClient.toString());
-                        wsClient= (WsClient) SpringContextUtils.getBean("wsClient");
-                        wsClient.connect();
-                    }
-                    try {
-                        Thread.sleep(50000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }).start();
+        taskExecutor.execute(new HeartThread(wsClient));
     }
 }
