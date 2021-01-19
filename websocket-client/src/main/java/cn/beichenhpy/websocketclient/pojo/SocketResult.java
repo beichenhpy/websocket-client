@@ -1,7 +1,7 @@
-package com.liugong.websocketclient.pojo;
+package cn.beichenhpy.websocketclient.pojo;
 
 
-import com.liugong.websocketclient.constant.CommonConstant;
+import cn.beichenhpy.websocketclient.constant.CommonConstant;
 
 public class SocketResult<T> {
 

@@ -1,4 +1,4 @@
-package com.liugong.websocketclient.constant;
+package cn.beichenhpy.websocketclient.constant;
 
 public interface CommonConstant {
 

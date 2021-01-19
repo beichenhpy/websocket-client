@@ -1,4 +1,4 @@
-package com.liugong.websocketclient.pojo;
+package cn.beichenhpy.websocketclient.pojo;
 
 
 public class SocketQuery {

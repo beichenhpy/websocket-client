@@ -1,7 +1,5 @@
-package com.liugong.websocketclient.config;
+package cn.beichenhpy.websocketclient.config;
 
-import com.liugong.websocketclient.heartbeat.HeartThread;
-import com.liugong.websocketclient.utils.SpringContextUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

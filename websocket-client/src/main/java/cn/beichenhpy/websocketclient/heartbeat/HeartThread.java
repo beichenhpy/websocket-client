@@ -1,12 +1,9 @@
-package com.liugong.websocketclient.heartbeat;
+package cn.beichenhpy.websocketclient.heartbeat;
 
-import com.liugong.websocketclient.config.WsClient;
-import com.liugong.websocketclient.utils.SpringContextUtils;
+import cn.beichenhpy.websocketclient.config.WsClient;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.concurrent.Semaphore;
 
 /**
  * @author beichenhpy

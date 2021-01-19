@@ -1,7 +1,6 @@
-package com.liugong.websocketclient.Scheduling;
+package cn.beichenhpy.websocketclient.Scheduling;
 
-import com.liugong.websocketclient.config.WsClient;
-import com.liugong.websocketclient.heartbeat.HeartThread;
+import cn.beichenhpy.websocketclient.config.WsClient;
 import org.java_websocket.WebSocket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

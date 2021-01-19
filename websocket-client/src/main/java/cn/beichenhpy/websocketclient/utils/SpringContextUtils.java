@@ -1,4 +1,4 @@
-package com.liugong.websocketclient.utils;
+package cn.beichenhpy.websocketclient.utils;
 
 import javax.servlet.http.HttpServletRequest;
 

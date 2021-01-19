@@ -1,17 +1,15 @@
-package com.liugong.websocketclient.config;
+package cn.beichenhpy.websocketclient.config;
 
+import cn.beichenhpy.websocketclient.pojo.Message;
+import cn.beichenhpy.websocketclient.pojo.SocketResult;
 import com.alibaba.fastjson.JSON;
-import com.liugong.websocketclient.pojo.Message;
-import com.liugong.websocketclient.pojo.SocketResult;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import javax.xml.ws.handler.MessageContext;
 import java.net.URI;
 
 /**

@@ -1,4 +1,4 @@
-package com.liugong.websocketclient;
+package cn.beichenhpy.websocketclient;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

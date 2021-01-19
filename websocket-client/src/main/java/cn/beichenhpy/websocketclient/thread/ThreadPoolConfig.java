@@ -1,4 +1,4 @@
-package com.liugong.websocketclient.thread;
+package cn.beichenhpy.websocketclient.thread;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
