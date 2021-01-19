@@ -26,7 +26,7 @@ public class HeartBeat {
     @Autowired
     private WsClient wsClient;
 
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "${heartbeat.time}")
     public void heartBeat() {
         log.info("【心跳线程执行】:当前client连接状态为：{}", wsClient.getReadyState());
         if (wsClient.getReadyState().equals(WebSocket.READYSTATE.NOT_YET_CONNECTED)) {
