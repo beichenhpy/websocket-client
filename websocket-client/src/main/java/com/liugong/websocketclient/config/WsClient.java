@@ -23,7 +23,10 @@ import java.net.URI;
 @Component
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
-
+    /**
+     * 连接成功过一次后设置为true
+     */
+    public boolean wasConnected = false;
     @Autowired
     URI uri;
 
@@ -34,7 +37,7 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
         log.info("[websocket] 连接成功");
-
+        wasConnected = true;
     }
 
     @Override
