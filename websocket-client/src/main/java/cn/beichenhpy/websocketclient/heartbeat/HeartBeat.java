@@ -17,7 +17,7 @@ public class HeartBeat {
     private static final Logger log = LoggerFactory.getLogger(HeartBeat.class);
     /**
      * repeatTime 尝试次数，超过5次则先暂停尝试
-     * notHeartBeatTime 未尝试次数，等于200后重置repeatTime
+     * notHeartBeatTime 未尝试次数，等于50后重置repeatTime
      */
     private int repeatTime = 5;
     private int notHeartBeatTime = 0;
