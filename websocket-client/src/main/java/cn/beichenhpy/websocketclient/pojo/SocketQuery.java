@@ -1,6 +1,10 @@
 package cn.beichenhpy.websocketclient.pojo;
 
-
+/**
+ * @author beichenhpy
+ * @since 2021-1-15
+ * @description TODO 查询实体类，可自行修改，此处作为示例
+ */
 public class SocketQuery {
 
     private String miningAreaCode;

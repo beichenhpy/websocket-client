@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description TODO 定时心跳重连
  * @since 2021/1/19 11:18
  */
 @Component
