@@ -44,7 +44,7 @@ public class WebSocketBasicServer {
     public void onClose(Session session) throws IOException {
         for(Map.Entry<String,Session> entry:clientsMap.entrySet()){
             if (entry.getValue().equals(session)){
-                clientsMap.remove(entry);
+                clientsMap.remove(entry.getKey());
                 log.info("断开连接,session:{}",session);
                 break;
             }
