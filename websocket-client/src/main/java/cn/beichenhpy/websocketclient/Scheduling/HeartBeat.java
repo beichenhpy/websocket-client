@@ -23,20 +23,24 @@ public class HeartBeat {
      */
     private int repeatTime = 5;
     private int notHeartBeatTime = 0;
-    @Autowired
-    private WsClient wsClient;
+    private final WsClient wsClient;
+
+    public HeartBeat(WsClient wsClient){
+        this.wsClient = wsClient;
+        //初始化连接
+        wsClient.connect();
+
+    }
 
     @Scheduled(cron = "${heartbeat.time}")
     public void heartBeat() {
         log.info("【心跳线程执行】:当前client连接状态为：{}", wsClient.getReadyState());
-        if (wsClient.getReadyState().equals(WebSocket.READYSTATE.NOT_YET_CONNECTED)) {
-                wsClient.connect();
-        } else if (!wsClient.wasConnected){
-            //是否连接过，如果没链接过则执行
-            log.warn("[websocket服务器初次连接失败]---正在努力尝试");
+        if (!wsClient.wasConnected){
+            /*第一次连接是否成功：false证明已经尝试过且失败 那么则状态已经为closed 需要reconnect*/
+            log.warn("[websocket初次连接失败]---正在努力尝试");
             wsClient.reconnect();
         } else if (wsClient.isClosed() || wsClient.isClosing()) {
-            //如果连接过执行这里
+            //用来判断连接不上服务器的情况的
             if (repeatTime != 0) {
                 log.warn("[websocket服务器连接失败]----正在尝试重新连接（剩余尝试次数：{}次）", repeatTime - 1);
                 wsClient.reconnect();
