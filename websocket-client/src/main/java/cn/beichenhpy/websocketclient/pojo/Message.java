@@ -15,6 +15,17 @@ public class Message implements Serializable {
     private SocketResult<?> socketResult;
     private SocketQuery query;
 
+    public Message(String fromUser, String toUser, String path, SocketResult<?> socketResult, SocketQuery query) {
+        this.fromUser = fromUser;
+        this.toUser = toUser;
+        this.path = path;
+        this.socketResult = socketResult;
+        this.query = query;
+    }
+
+    public Message() {
+    }
+
     public SocketQuery getQuery() {
         return query;
     }

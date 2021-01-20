@@ -7,6 +7,14 @@ public class SocketQuery {
 
     private String summaryTypeCode;
 
+    public SocketQuery(String miningAreaCode, String summaryTypeCode) {
+        this.miningAreaCode = miningAreaCode;
+        this.summaryTypeCode = summaryTypeCode;
+    }
+
+    public SocketQuery() {
+    }
+
     public String getMiningAreaCode() {
         return miningAreaCode;
     }
