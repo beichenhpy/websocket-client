@@ -23,7 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(path = "/beichenhpy/ws/{deviceNo}",port = "${server.port}")
 public class WebSocketBasicServer {
     private static final Logger log = LoggerFactory.getLogger(WebSocketBasicServer.class);
-    private static ConcurrentHashMap<String, Session> clientsMap = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<String, Session> CLIENTS_MAP = new ConcurrentHashMap<>();
     @BeforeHandshake
     public void handshake(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         session.setSubprotocols("stomp");
@@ -37,14 +37,14 @@ public class WebSocketBasicServer {
     public void onOpen(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         log.info("连接成功,session:{}",session);
         String deviceNo = pathMap.get("deviceNo").toString();
-        clientsMap.put(deviceNo,session);
+        CLIENTS_MAP.put(deviceNo,session);
     }
 
     @OnClose
     public void onClose(Session session) throws IOException {
-        for(Map.Entry<String,Session> entry:clientsMap.entrySet()){
+        for(Map.Entry<String,Session> entry:CLIENTS_MAP.entrySet()){
             if (entry.getValue().equals(session)){
-                clientsMap.remove(entry.getKey());
+                CLIENTS_MAP.remove(entry.getKey());
                 log.info("断开连接,session:{}",session);
                 break;
             }
@@ -93,7 +93,7 @@ public class WebSocketBasicServer {
     }
     //给指定用户发送信息
     public void sendInfo(String userName, String message){
-        Session session = clientsMap.get(userName);
+        Session session = CLIENTS_MAP.get(userName);
         try {
             session.sendText(message);
         }catch (Exception e){
