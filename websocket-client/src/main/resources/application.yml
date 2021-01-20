@@ -2,4 +2,4 @@ server:
   port: 8888
 
 heartbeat:
-  time: '0/10 * * * * ?'
+  time: '0/50 * * * * ?'

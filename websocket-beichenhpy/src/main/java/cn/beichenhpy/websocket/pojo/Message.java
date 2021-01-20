@@ -11,8 +11,25 @@ import java.io.Serializable;
 public class Message implements Serializable {
     private String fromUser;
     private String toUser;
+    private String path;
     private SocketResult<?> socketResult;
+    private SocketQuery query;
 
+    public SocketQuery getQuery() {
+        return query;
+    }
+
+    public void setQuery(SocketQuery query) {
+        this.query = query;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public String getPath() {
+        return path;
+    }
     public String getFromUser() {
         return fromUser;
     }
@@ -35,14 +52,5 @@ public class Message implements Serializable {
 
     public void setSocketResult(SocketResult<?> socketResult) {
         this.socketResult = socketResult;
-    }
-
-    @Override
-    public String toString() {
-        return "Message{" +
-                "fromUser='" + fromUser + '\'' +
-                ", toUser='" + toUser + '\'' +
-                ", socketResult=" + socketResult +
-                '}';
     }
 }

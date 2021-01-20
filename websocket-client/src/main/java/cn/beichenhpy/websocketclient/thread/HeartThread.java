@@ -1,4 +1,4 @@
-package cn.beichenhpy.websocketclient.heartbeat;
+package cn.beichenhpy.websocketclient.thread;
 
 import cn.beichenhpy.websocketclient.config.WsClient;
 import org.java_websocket.WebSocket;
@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
  * @description TODO 心跳线程
  * @since 2021/1/18 9:14
  */
+@Deprecated
 public class HeartThread implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(HeartThread.class);
     /**
