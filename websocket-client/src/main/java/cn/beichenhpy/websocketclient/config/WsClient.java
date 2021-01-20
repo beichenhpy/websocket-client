@@ -19,7 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO websocket客户端 单例有问题，改为多例
+ * @description TODO websocket客户端
  * @since 2021/1/15 15:28
  */
 @Component
