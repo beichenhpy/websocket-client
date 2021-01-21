@@ -33,7 +33,7 @@ public class AfterBoot implements ApplicationRunner {
     public  ConcurrentHashMap<String[], Method> getPathToMethodMap() {
         return pathToMethodMap;
     }
-    @Value("${reflection.path}")
+    @Value("${ws-client.reflection-path}")
     private String packagePath;
     @Override
     public void run(ApplicationArguments args) {

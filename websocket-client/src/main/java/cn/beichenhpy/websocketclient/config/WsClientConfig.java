@@ -15,7 +15,7 @@ import java.net.URISyntaxException;
  */
 @Configuration
 public class WsClientConfig {
-    @Value("${WebSocket.uri}")
+    @Value("${ws-client.web-socket-server-uri}")
     private String uri;
     @Bean
     URI uri() throws URISyntaxException {

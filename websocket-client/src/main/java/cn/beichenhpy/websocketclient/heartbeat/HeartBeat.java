@@ -30,7 +30,7 @@ public class HeartBeat {
 
     }
 
-    @Scheduled(cron = "${heartbeat.time}")
+    @Scheduled(cron = "${ws-client.heartbeat}")
     public void heartBeat() {
         log.info("【心跳线程执行】:当前client连接状态为：{}", wsClient.getReadyState());
         if (!wsClient.wasConnected){
