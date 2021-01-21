@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @description TODO
  * @since 2021/1/15 12:32
  */
-@ServerEndpoint(path = "/beichenhpy/ws/{deviceNo}",port = "${server.port}")
+@ServerEndpoint(path = "${webSocket.path}",port = "${server.port}")
 public class WebSocketBasicServer {
     private static final Logger log = LoggerFactory.getLogger(WebSocketBasicServer.class);
     private static final ConcurrentHashMap<String, Session> CLIENTS_MAP = new ConcurrentHashMap<>();

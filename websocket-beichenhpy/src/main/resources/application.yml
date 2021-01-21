@@ -1,0 +1,5 @@
+server:
+  port: 9999
+
+webSocket:
+  path: '/beichenhpy/ws/{deviceNo}'

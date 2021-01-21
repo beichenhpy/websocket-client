@@ -3,3 +3,9 @@ server:
 
 heartbeat:
   time: '0/50 * * * * ?'
+
+reflection:
+  path: 'cn.beichenhpy'
+
+WebSocket:
+  uri: 'ws://localhost:9999/beichenhpy/ws/backend?req=ok'
