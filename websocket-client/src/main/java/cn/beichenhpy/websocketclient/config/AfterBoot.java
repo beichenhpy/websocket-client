@@ -1,6 +1,7 @@
 package cn.beichenhpy.websocketclient.config;
 
 import cn.beichenhpy.websocketclient.anno.WebSocketMsg;
+import cn.beichenhpy.websocketclient.pojo.WsClientYmlConfig;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
@@ -33,11 +34,16 @@ public class AfterBoot implements ApplicationRunner {
     public  ConcurrentHashMap<String[], Method> getPathToMethodMap() {
         return pathToMethodMap;
     }
-    @Value("${ws-client.reflection-path}")
-    private String packagePath;
+
+    private final WsClientYmlConfig wsClientYmlConfig;
+
+    public AfterBoot(WsClientYmlConfig wsClientYmlConfig) {
+        this.wsClientYmlConfig = wsClientYmlConfig;
+    }
+
     @Override
     public void run(ApplicationArguments args) {
-        Reflections reflections = new Reflections(packagePath,new MethodAnnotationsScanner());
+        Reflections reflections = new Reflections(wsClientYmlConfig.getReflectionPath(),new MethodAnnotationsScanner());
         Set<Method> typesAnnotatedWith = reflections.getMethodsAnnotatedWith(WebSocketMsg.class);
         for (Method method : typesAnnotatedWith) {
             String[] value = method.getDeclaredAnnotation(WebSocketMsg.class).value();

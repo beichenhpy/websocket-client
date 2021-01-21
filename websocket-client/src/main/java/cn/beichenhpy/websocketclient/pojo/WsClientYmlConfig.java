@@ -1,6 +1,7 @@
 package cn.beichenhpy.websocketclient.pojo;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
 /**
  * @author beichenhpy
@@ -8,8 +9,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @description TODO
  * @since 2021/1/21 13:46
  */
+@Component
 @ConfigurationProperties(prefix = "ws-client")
-public class WsClientConfig {
+public class WsClientYmlConfig {
     private String heartbeat;
     private String reflectionPath;
     private String webSocketServerUri;

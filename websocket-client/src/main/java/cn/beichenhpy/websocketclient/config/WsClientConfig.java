@@ -1,5 +1,6 @@
 package cn.beichenhpy.websocketclient.config;
 
+import cn.beichenhpy.websocketclient.pojo.WsClientYmlConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,10 +16,15 @@ import java.net.URISyntaxException;
  */
 @Configuration
 public class WsClientConfig {
-    @Value("${ws-client.web-socket-server-uri}")
-    private String uri;
+
+    private final WsClientYmlConfig wsClientYmlConfig;
+
+    public WsClientConfig(WsClientYmlConfig wsClientYmlConfig) {
+        this.wsClientYmlConfig = wsClientYmlConfig;
+    }
+
     @Bean
     URI uri() throws URISyntaxException {
-        return new URI(uri);
+        return new URI(wsClientYmlConfig.getWebSocketServerUri());
     }
 }
