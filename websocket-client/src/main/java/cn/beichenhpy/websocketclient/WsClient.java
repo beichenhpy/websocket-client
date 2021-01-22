@@ -92,7 +92,11 @@ public class WsClient extends WebSocketClient {
                         //拿到bean实例
                         Object bean = SpringContextUtils.getBean(simpleName);
                         //反射
-                        method.invoke(bean,query);
+                        if (query == null){
+                            method.invoke(bean);
+                        }else {
+                            method.invoke(bean,query);
+                        }
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
