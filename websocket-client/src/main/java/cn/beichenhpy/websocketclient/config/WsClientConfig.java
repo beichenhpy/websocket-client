@@ -1,5 +1,7 @@
 package cn.beichenhpy.websocketclient.config;
 
+import cn.beichenhpy.websocketclient.pojo.WsClientYmlConfig;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -14,8 +16,15 @@ import java.net.URISyntaxException;
  */
 @Configuration
 public class WsClientConfig {
+
+    private final WsClientYmlConfig wsClientYmlConfig;
+
+    public WsClientConfig(WsClientYmlConfig wsClientYmlConfig) {
+        this.wsClientYmlConfig = wsClientYmlConfig;
+    }
+
     @Bean
     URI uri() throws URISyntaxException {
-        return new URI("ws://localhost:9999/beichenhpy/ws/backend?req=ok");
+        return new URI(wsClientYmlConfig.getWebSocketServerUri());
     }
 }

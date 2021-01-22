@@ -1,6 +1,7 @@
 package cn.beichenhpy.websocketclient.heartbeat;
 
 import cn.beichenhpy.websocketclient.config.WsClient;
+import cn.beichenhpy.websocketclient.pojo.WsClientYmlConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -30,7 +31,7 @@ public class HeartBeat {
 
     }
 
-    @Scheduled(cron = "${heartbeat.time}")
+    @Scheduled(cron = "${ws-client.heartbeat}")
     public void heartBeat() {
         log.info("【心跳线程执行】:当前client连接状态为：{}", wsClient.getReadyState());
         if (!wsClient.wasConnected){

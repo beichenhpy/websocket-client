@@ -1,12 +1,14 @@
 package cn.beichenhpy.websocketclient.config;
 
 import cn.beichenhpy.websocketclient.anno.WebSocketMsg;
+import cn.beichenhpy.websocketclient.pojo.WsClientYmlConfig;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.reflections.scanners.TypeAnnotationsScanner;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.core.task.TaskExecutor;
@@ -33,9 +35,15 @@ public class AfterBoot implements ApplicationRunner {
         return pathToMethodMap;
     }
 
+    private final WsClientYmlConfig wsClientYmlConfig;
+
+    public AfterBoot(WsClientYmlConfig wsClientYmlConfig) {
+        this.wsClientYmlConfig = wsClientYmlConfig;
+    }
+
     @Override
     public void run(ApplicationArguments args) {
-        Reflections reflections = new Reflections("cn.beichenhpy",new MethodAnnotationsScanner());
+        Reflections reflections = new Reflections(wsClientYmlConfig.getReflectionPath(),new MethodAnnotationsScanner());
         Set<Method> typesAnnotatedWith = reflections.getMethodsAnnotatedWith(WebSocketMsg.class);
         for (Method method : typesAnnotatedWith) {
             String[] value = method.getDeclaredAnnotation(WebSocketMsg.class).value();
