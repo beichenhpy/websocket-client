@@ -6,7 +6,6 @@
 
 #### 第三方引入说明 
 mvn install 本项目到本地仓库
-引入后 需要配置 `@ComponentScan(value = "cn.beichenhpy")` 才可以使用。
 Message数据结构如下：
 ```json
 {

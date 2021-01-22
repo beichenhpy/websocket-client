@@ -14,6 +14,7 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -33,6 +34,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
     public  ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
+
+    /**
+     * repeatTime 尝试次数，超过5次则先暂停尝试
+     * notHeartBeatTime 未尝试次数，等于50后重置repeatTime
+     */
+    private int repeatTime = 5;
+    private int notHeartBeatTime = 0;
     /**
      * 连接成功过一次后设置为true
      */
@@ -42,14 +50,14 @@ public class WsClient extends WebSocketClient {
      */
     private boolean isScanned = false;
 
-    @Resource(name = "wsClientYmlConfig")
+    @Autowired
     private  WsClientYmlConfig wsClientYmlConfig;
 
-    @Resource(name = "uri")
-    private URI uri;
+
 
     public WsClient(URI uri) {
         super(uri);
+        this.connect();
     }
 
     @Override
@@ -116,5 +124,29 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         log.info("[websocket] 连接错误={}", ex.getMessage());
+    }
+
+    @Scheduled(cron = "${ws-client.heartbeat}")
+    public void heartBeat() {
+        log.info("【心跳线程执行】:当前client连接状态为：{}", this.getReadyState());
+        if (!this.wasConnected){
+            /*第一次连接是否成功：false证明已经尝试过且失败 那么则状态已经为closed 需要reconnect*/
+            log.warn("[websocket初次连接失败]---正在努力尝试");
+            this.reconnect();
+        } else if (this.isClosed() || this.isClosing()) {
+            //用来判断连接不上服务器的情况的
+            if (repeatTime != 0) {
+                log.warn("[websocket服务器连接失败]----正在尝试重新连接（剩余尝试次数：{}次）", repeatTime - 1);
+                this.reconnect();
+                repeatTime--;
+            }
+        }
+        if (repeatTime == 0) {
+            notHeartBeatTime++;
+        }
+        if (notHeartBeatTime == 50) {
+            repeatTime = 5;
+        }
+
     }
 }
