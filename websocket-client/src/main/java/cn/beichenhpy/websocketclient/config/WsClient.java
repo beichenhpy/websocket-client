@@ -31,8 +31,7 @@ public class WsClient extends WebSocketClient {
      * 连接成功过一次后设置为true
      */
     public boolean wasConnected = false;
-    @Autowired
-    URI uri;
+
 
     public WsClient(URI uri) {
         super(uri);
