@@ -1,19 +1,26 @@
-package cn.beichenhpy.websocketclient.config;
+package cn.beichenhpy.websocketclient;
 
+import cn.beichenhpy.websocketclient.anno.WebSocketMsg;
+import cn.beichenhpy.websocketclient.config.WsClientYmlConfig;
+import cn.beichenhpy.websocketclient.pojo.Content;
 import cn.beichenhpy.websocketclient.pojo.Message;
-import cn.beichenhpy.websocketclient.pojo.SocketQuery;
+import cn.beichenhpy.websocketclient.pojo.MsgQuery;
 import cn.beichenhpy.websocketclient.utils.SpringContextUtils;
 import com.alibaba.fastjson.JSON;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.reflections.Reflections;
+import org.reflections.scanners.MethodAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -25,14 +32,21 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
-    @Autowired
-    private AfterBoot afterBoot;
+    public  ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
     /**
      * 连接成功过一次后设置为true
      */
     public boolean wasConnected = false;
-    @Autowired
-    URI uri;
+    /**
+     * 是否扫描过
+     */
+    private boolean isScanned = false;
+
+    @Resource(name = "wsClientYmlConfig")
+    private  WsClientYmlConfig wsClientYmlConfig;
+
+    @Resource(name = "uri")
+    private URI uri;
 
     public WsClient(URI uri) {
         super(uri);
@@ -42,15 +56,27 @@ public class WsClient extends WebSocketClient {
     public void onOpen(ServerHandshake serverHandshake) {
         log.info("[websocket] 连接成功");
         wasConnected = true;
+        //执行扫描
+        if (!isScanned){
+            Reflections reflections = new Reflections(wsClientYmlConfig.getReflectionPath(),new MethodAnnotationsScanner());
+            Set<Method> typesAnnotatedWith = reflections.getMethodsAnnotatedWith(WebSocketMsg.class);
+            for (Method method : typesAnnotatedWith) {
+                String[] value = method.getDeclaredAnnotation(WebSocketMsg.class).value();
+                pathToMethodMap.put(value,method);
+            }
+            isScanned = true;
+        }
     }
 
     @Override
     public void onMessage(String message) {
-        Message messageJson = JSON.parseObject(message, Message.class);
-        String path = messageJson.getPath();
-        SocketQuery query = messageJson.getQuery();
-        //todo 利用methodName反射执行对应实现类的方法 单纯的enum管理反射不好，失去了多态特性，如果使用path来匹配的话可能会好一些
-        ConcurrentHashMap<String[], Method> pathToMethodMap = afterBoot.getPathToMethodMap();
+        //解析传送Message
+        Message msg = JSON.parseObject(message, Message.class);
+        //拿到content
+        Content content = JSON.parseObject(msg.getContent(), Content.class);
+        //拿到路径和query条件
+        String path = content.getPath();
+        MsgQuery query = content.getMsgQuery();
         //取出keySet
         ConcurrentHashMap.KeySetView<String[], Method> keySetView = pathToMethodMap.keySet();
         for (String[] strings : keySetView) {
