@@ -40,16 +40,6 @@ public class WsClient extends WebSocketClient {
     public static ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
 
     /**
-     * repeatTime 尝试次数，超过5次则先暂停尝试
-     * notHeartBeatTime 未尝试次数，等于50后重置repeatTime
-     */
-    private static int repeatTime = 5;
-    private static int notHeartBeatTime = 0;
-    /**
-     * 连接成功过一次后设置为true
-     */
-    public static boolean wasConnected = false;
-    /**
      * 是否扫描过
      */
     private static boolean isScanned = false;
@@ -100,7 +90,6 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
         log.info("[websocket] 连接成功");
-        wasConnected = true;
         //执行扫描
         if (!isScanned){
             Reflections reflections = new Reflections(wsClientYmlConfig.getReflectionPath(),new MethodAnnotationsScanner());
@@ -156,7 +145,13 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.info("[websocket] 退出连接，code:{},reason:{},remote:{}",code,reason,remote );
-        taskExecutor.execute(this::timingReconnect);
+        if (code == -1){
+            log.warn("【webSocket】连接失败----服务器拒绝连接，请检查服务器连接配置或服务器是否存在");
+        }
+        if (code == 1006){
+            log.warn("【webSocket】退出连接----服务器主动关闭连接，请检查WebSocket服务器运行是否正常");
+        }
+        taskExecutor.execute(this::reconnect);
         try {
             Thread.sleep(wsClientYmlConfig.getReconnectTime());
         } catch (InterruptedException e) {
@@ -167,31 +162,5 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onError(Exception ex) {
         log.info("[websocket] 连接错误={},",ex.toString());
-    }
-
-    /**
-     * 重连算法
-     */
-    public void timingReconnect() {
-        log.info("【自动重连线程执行中】:当前client连接状态为：{}", this.getReadyState());
-        if (!wasConnected){
-            /*第一次连接是否成功：false证明已经尝试过且失败 那么则状态已经为closed 需要reconnect*/
-            log.warn("[websocket初次连接失败]---正在努力尝试");
-            this.reconnect();
-        } else if (this.isClosed() || this.isClosing()) {
-            //用来判断连接不上服务器的情况的
-            if (repeatTime != 0) {
-                log.warn("[websocket服务器连接失败]----正在尝试重新连接（剩余尝试次数：{}次）", repeatTime - 1);
-                this.reconnect();
-                repeatTime--;
-            }
-        }
-        if (repeatTime == 0) {
-            notHeartBeatTime++;
-        }
-        if (notHeartBeatTime == 50) {
-            repeatTime = 5;
-        }
-
     }
 }
