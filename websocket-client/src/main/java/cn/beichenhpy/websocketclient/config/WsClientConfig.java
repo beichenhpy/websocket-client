@@ -23,6 +23,7 @@ public class WsClientConfig {
 
     @Bean
     URI uri() throws URISyntaxException {
+        //todo 未来将会添加token生成验证
         return new URI(wsClientYmlConfig.getWebSocketServerUri());
     }
 }
