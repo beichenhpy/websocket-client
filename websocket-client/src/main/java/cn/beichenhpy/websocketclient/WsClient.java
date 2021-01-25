@@ -126,9 +126,9 @@ public class WsClient extends WebSocketClient {
         log.info("[websocket] 连接错误={}", ex.getMessage());
     }
 
-    @Scheduled(cron = "${ws-client.heartbeat}")
-    public void heartBeat() {
-        log.info("【心跳线程执行】:当前client连接状态为：{}", this.getReadyState());
+    @Scheduled(cron = "${ws-client.reconnect-cron}")
+    public void timingReconnect() {
+        log.info("【自动重连线程执行中】:当前client连接状态为：{}", this.getReadyState());
         if (!this.wasConnected){
             /*第一次连接是否成功：false证明已经尝试过且失败 那么则状态已经为closed 需要reconnect*/
             log.warn("[websocket初次连接失败]---正在努力尝试");

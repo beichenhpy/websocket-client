@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "ws-client")
 public class WsClientYmlConfig {
     /**
-     * 心跳时间间隔 cron表达式
+     * 重连时间间隔 cron表达式
      */
-    private String heartbeat;
+    private String reconnectCron;
     /**
      * 反射搜索路径
      */
@@ -25,12 +25,12 @@ public class WsClientYmlConfig {
      */
     private String webSocketServerUri;
 
-    public String getHeartbeat() {
-        return heartbeat;
+    public String getReconnectCron() {
+        return reconnectCron;
     }
 
-    public void setHeartbeat(String heartbeat) {
-        this.heartbeat = heartbeat;
+    public void setReconnectCron(String reconnectCron) {
+        this.reconnectCron = reconnectCron;
     }
 
     public String getReflectionPath() {

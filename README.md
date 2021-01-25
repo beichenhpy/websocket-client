@@ -9,20 +9,26 @@ mvn install 本项目到本地仓库
 Message数据结构如下：
 ```json
 {
-	fromUser: "bigscreen",
-	toUser: "test",
-	msgType: "0",
-	content: {
-		path: "/test",
-		msgQuery: {
-			queryContent: {
-				test: "sss"
-			},
-			queryType: "test"
-		},
-		socketResult: {
-			
-		}
-	}
+  "fromUser": "bigscreen",
+  "toUser": "test",
+  "msgType": "0",
+  "content": {
+    "path": "/test",
+    "msgQuery": {
+      "queryContent": {
+        "test": "sss"
+      },
+      "queryType": "test"
+    },
+    "socketResult": {
+    }
+  }
 }
+```
+### 配置文件说明
+```yaml
+ws-client:
+  reconnect-cron: '0/50 * * * * ?' #重连线程监听cron表达式
+  reflection-path: 'cn.beichenhpy' #注解需要扫描的目录
+  web-socket-server-uri: 'ws://localhost:9999/beichenhpy/ws/backend?req=ok' #websocketServerUri
 ```
