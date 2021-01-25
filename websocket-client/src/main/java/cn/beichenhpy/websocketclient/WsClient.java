@@ -14,7 +14,10 @@ import org.reflections.scanners.MethodAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -23,6 +26,7 @@ import java.net.URI;
 import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * @author beichenhpy
@@ -33,31 +37,64 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
-    public  ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
+    public static ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
 
     /**
      * repeatTime 尝试次数，超过5次则先暂停尝试
      * notHeartBeatTime 未尝试次数，等于50后重置repeatTime
      */
-    private int repeatTime = 5;
-    private int notHeartBeatTime = 0;
+    private static int repeatTime = 5;
+    private static int notHeartBeatTime = 0;
     /**
      * 连接成功过一次后设置为true
      */
-    public boolean wasConnected = false;
+    public static boolean wasConnected = false;
     /**
      * 是否扫描过
      */
-    private boolean isScanned = false;
+    private static boolean isScanned = false;
+    /**
+     * 线程池
+     */
+    private static TaskExecutor taskExecutor;
 
-    @Autowired
-    private  WsClientYmlConfig wsClientYmlConfig;
+    /**
+     * 必须构造函数注入，因为自动注入会在构造函数执行之后才注入，会出现注入bean = null
+     */
+    private final WsClientYmlConfig wsClientYmlConfig;
 
-
-
-    public WsClient(URI uri) {
+    public WsClient(URI uri,WsClientYmlConfig wsClientYmlConfig) {
         super(uri);
+        this.wsClientYmlConfig = wsClientYmlConfig;
+        //单例初始化线程池
+        if (taskExecutor == null){
+            taskExecutor = initThreadPool();
+        }
         this.connect();
+    }
+
+    /**
+     * 初始化线程池
+     * @return TaskExecutor
+     */
+    private TaskExecutor initThreadPool(){
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        // 设置核心线程数
+        executor.setCorePoolSize(50);
+        // 设置最大线程数
+        executor.setMaxPoolSize(100);
+        // 设置队列容量
+        executor.setQueueCapacity(20);
+        // 设置线程活跃时间（秒）
+        executor.setKeepAliveSeconds(60);
+        // 设置默认线程名称
+        executor.setThreadNamePrefix("wsClient-reconnect-");
+        // 设置拒绝策略
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        // 等待所有任务结束后再关闭线程池
+        executor.setWaitForTasksToCompleteOnShutdown(true);
+        executor.initialize();
+        return executor;
     }
 
     @Override
@@ -118,18 +155,26 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.info("[websocket] 退出连接，{}", reason);
+        log.info("[websocket] 退出连接，code:{},reason:{},remote:{}",code,reason,remote );
+        taskExecutor.execute(this::timingReconnect);
+        try {
+            Thread.sleep(wsClientYmlConfig.getReconnectTime());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onError(Exception ex) {
-        log.info("[websocket] 连接错误={}", ex.getMessage());
+        log.info("[websocket] 连接错误={},",ex.toString());
     }
 
-    @Scheduled(cron = "${ws-client.reconnect-cron}")
+    /**
+     * 重连算法
+     */
     public void timingReconnect() {
         log.info("【自动重连线程执行中】:当前client连接状态为：{}", this.getReadyState());
-        if (!this.wasConnected){
+        if (!wasConnected){
             /*第一次连接是否成功：false证明已经尝试过且失败 那么则状态已经为closed 需要reconnect*/
             log.warn("[websocket初次连接失败]---正在努力尝试");
             this.reconnect();

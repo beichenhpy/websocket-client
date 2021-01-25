@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
  * @since 2021/1/22 12:09
  */
 @Configuration
-@EnableScheduling
 @ConditionalOnClass({WsClient.class})
 @EnableConfigurationProperties({ WsClientYmlConfig.class })
 public class AutoConfiguration {
@@ -33,7 +32,8 @@ public class AutoConfiguration {
     @ConditionalOnMissingBean(WsClient.class)
     public WsClient wsClient() throws URISyntaxException {
         URI uri = new URI(wsClientYmlConfig.getWebSocketServerUri());
-        return new WsClient(uri);
+        //TODO 将会使用JwtUtil增加token验证机制
+        return new WsClient(uri,wsClientYmlConfig);
     }
 
 

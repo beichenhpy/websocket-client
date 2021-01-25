@@ -15,7 +15,7 @@ public class WsClientYmlConfig {
     /**
      * 重连时间间隔 cron表达式
      */
-    private String reconnectCron;
+    private long reconnectTime;
     /**
      * 反射搜索路径
      */
@@ -25,12 +25,12 @@ public class WsClientYmlConfig {
      */
     private String webSocketServerUri;
 
-    public String getReconnectCron() {
-        return reconnectCron;
+    public long getReconnectTime() {
+        return reconnectTime;
     }
 
-    public void setReconnectCron(String reconnectCron) {
-        this.reconnectCron = reconnectCron;
+    public void setReconnectTime(long reconnectTime) {
+        this.reconnectTime = reconnectTime;
     }
 
     public String getReflectionPath() {
