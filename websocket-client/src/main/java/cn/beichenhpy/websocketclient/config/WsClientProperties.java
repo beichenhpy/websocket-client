@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "ws-client")
-public class WsClientYmlConfig {
+public class WsClientProperties {
     /**
      * 重连时间间隔 cron表达式
      */

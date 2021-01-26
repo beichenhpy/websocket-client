@@ -1,6 +1,6 @@
 
 ## websocket-client为java客户端
-  使用`Java-WebSocket`  使用`Scheduled`做简单的心跳
+  使用`Java-WebSocket`  提供错误重连
 ## 使用方法
 其他客户端如果想要请求，则需要严格按照`Message`实体类传输 实体类中的 `path`对应注解的 `value`
 

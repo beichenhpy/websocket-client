@@ -1,26 +1,23 @@
 package cn.beichenhpy.websocketclient;
 
 import cn.beichenhpy.websocketclient.anno.WebSocketMsg;
-import cn.beichenhpy.websocketclient.config.WsClientYmlConfig;
+import cn.beichenhpy.websocketclient.config.WsClientProperties;
 import cn.beichenhpy.websocketclient.pojo.Content;
 import cn.beichenhpy.websocketclient.pojo.Message;
 import cn.beichenhpy.websocketclient.pojo.MsgQuery;
 import cn.beichenhpy.websocketclient.utils.SpringContextUtils;
 import com.alibaba.fastjson.JSON;
 import org.java_websocket.client.WebSocketClient;
+import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
 import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.task.TaskExecutor;
-import org.springframework.scheduling.TaskScheduler;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Locale;
@@ -51,14 +48,16 @@ public class WsClient extends WebSocketClient {
     /**
      * 必须构造函数注入，因为自动注入会在构造函数执行之后才注入，会出现注入bean = null
      */
-    private final WsClientYmlConfig wsClientYmlConfig;
+    private final WsClientProperties wsClientProperties;
 
-    public WsClient(URI uri,WsClientYmlConfig wsClientYmlConfig) {
+    public WsClient(URI uri, WsClientProperties wsClientProperties) {
         super(uri);
-        this.wsClientYmlConfig = wsClientYmlConfig;
+        this.wsClientProperties = wsClientProperties;
         //单例初始化线程池
         if (taskExecutor == null){
-            taskExecutor = initThreadPool();
+            synchronized (WsClient.class){
+                taskExecutor = initThreadPool();
+            }
         }
         this.connect();
     }
@@ -92,7 +91,7 @@ public class WsClient extends WebSocketClient {
         log.info("[websocket] 连接成功");
         //执行扫描
         if (!isScanned){
-            Reflections reflections = new Reflections(wsClientYmlConfig.getReflectionPath(),new MethodAnnotationsScanner());
+            Reflections reflections = new Reflections(wsClientProperties.getReflectionPath(),new MethodAnnotationsScanner());
             Set<Method> typesAnnotatedWith = reflections.getMethodsAnnotatedWith(WebSocketMsg.class);
             for (Method method : typesAnnotatedWith) {
                 String[] value = method.getDeclaredAnnotation(WebSocketMsg.class).value();
@@ -145,15 +144,15 @@ public class WsClient extends WebSocketClient {
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.info("[websocket] 退出连接，code:{},reason:{},remote:{}",code,reason,remote );
-        if (code == -1){
+        if (code == CloseFrame.NEVER_CONNECTED){
             log.warn("【webSocket】连接失败----服务器拒绝连接，请检查服务器连接配置或服务器是否存在");
         }
-        if (code == 1006){
+        if (code == CloseFrame.ABNORMAL_CLOSE){
             log.warn("【webSocket】退出连接----服务器主动关闭连接，请检查WebSocket服务器运行是否正常");
         }
         taskExecutor.execute(this::reconnect);
         try {
-            Thread.sleep(wsClientYmlConfig.getReconnectTime());
+            Thread.sleep(wsClientProperties.getReconnectTime());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
