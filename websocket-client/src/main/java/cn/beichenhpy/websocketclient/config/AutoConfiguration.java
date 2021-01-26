@@ -16,7 +16,7 @@ import java.net.URI;
  * @since 2021/1/22 12:09
  */
 @Configuration
-@Import(WsClientUriConfig.class)
+@Import({WsClientUriConfig.class, SpringContextUtils.class})
 @ConditionalOnClass({WsClient.class})
 @EnableConfigurationProperties({ WsClientProperties.class })
 public class AutoConfiguration {
