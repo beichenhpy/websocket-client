@@ -1,6 +1,7 @@
 package cn.beichenhpy.websocketclient.config;
 
 import cn.beichenhpy.websocketclient.WsClient;
+import cn.beichenhpy.websocketclient.utils.SpringContextUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,7 +17,7 @@ import java.net.URI;
  * @since 2021/1/22 12:09
  */
 @Configuration
-@Import(WsClientUriConfig.class)
+@Import({WsClientUriConfig.class, SpringContextUtils.class})
 @ConditionalOnClass({WsClient.class})
 @EnableConfigurationProperties({ WsClientProperties.class })
 public class AutoConfiguration {
