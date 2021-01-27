@@ -118,12 +118,8 @@ public class WsClient extends WebSocketClient {
                     Method method = pathToMethodMap.get(strings);
                     try {
                         Class<?> declaringClass = method.getDeclaringClass();
-                        //避免多例 尝试用spring获取对象
-                        //拿到类名 开头转小写
-                        String simpleName = declaringClass.getSimpleName();
-                        simpleName = simpleName.substring(0,1).toLowerCase(Locale.ROOT).concat(simpleName.substring(1));
                         //拿到bean实例
-                        Object bean = SpringContextUtils.getBean(simpleName);
+                        Object bean = SpringContextUtils.getBean(declaringClass);
                         //反射
                         if (query == null){
                             method.invoke(bean);

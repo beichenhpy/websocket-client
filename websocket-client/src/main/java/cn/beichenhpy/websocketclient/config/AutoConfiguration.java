@@ -1,6 +1,7 @@
 package cn.beichenhpy.websocketclient.config;
 
 import cn.beichenhpy.websocketclient.WsClient;
+import cn.beichenhpy.websocketclient.utils.SpringContextUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
