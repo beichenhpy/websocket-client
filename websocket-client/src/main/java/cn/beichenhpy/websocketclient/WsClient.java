@@ -31,7 +31,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @description TODO websocket客户端
  * @since 2021/1/15 15:28
  */
-@Component
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
     public static ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
@@ -44,15 +43,30 @@ public class WsClient extends WebSocketClient {
      * 线程池
      */
     private static TaskExecutor taskExecutor;
-
     /**
-     * 必须构造函数注入，因为自动注入会在构造函数执行之后才注入，会出现注入bean = null
+     * 反射路径
      */
-    private final WsClientProperties wsClientProperties;
+    private final String reflectionPath;
+    /**
+     * 睡眠时间 默认5s
+     */
+    private Long reconnectTime = 5000L;
 
-    public WsClient(URI uri, WsClientProperties wsClientProperties) {
+    public WsClient(URI uri,String reflectionPath,Long reconnectTime) {
         super(uri);
-        this.wsClientProperties = wsClientProperties;
+        this.reconnectTime = reconnectTime;
+        this.reflectionPath = reflectionPath;
+        //单例初始化线程池
+        if (taskExecutor == null){
+            synchronized (WsClient.class){
+                taskExecutor = initThreadPool();
+            }
+        }
+        this.connect();
+    }
+    public WsClient(URI uri,String reflectionPath) {
+        super(uri);
+        this.reflectionPath = reflectionPath;
         //单例初始化线程池
         if (taskExecutor == null){
             synchronized (WsClient.class){
@@ -91,7 +105,7 @@ public class WsClient extends WebSocketClient {
         log.info("[websocket] 连接成功");
         //执行扫描
         if (!isScanned){
-            Reflections reflections = new Reflections(wsClientProperties.getReflectionPath(),new MethodAnnotationsScanner());
+            Reflections reflections = new Reflections(reflectionPath,new MethodAnnotationsScanner());
             Set<Method> typesAnnotatedWith = reflections.getMethodsAnnotatedWith(WebSocketMsg.class);
             for (Method method : typesAnnotatedWith) {
                 String[] value = method.getDeclaredAnnotation(WebSocketMsg.class).value();
@@ -148,7 +162,7 @@ public class WsClient extends WebSocketClient {
         }
         taskExecutor.execute(this::reconnect);
         try {
-            Thread.sleep(wsClientProperties.getReconnectTime());
+            Thread.sleep(reconnectTime);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

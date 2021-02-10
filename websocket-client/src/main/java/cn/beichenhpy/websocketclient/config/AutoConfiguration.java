@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.*;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 
 
 /**
@@ -17,23 +18,23 @@ import java.net.URI;
  * @since 2021/1/22 12:09
  */
 @Configuration
-@Import({WsClientUriConfig.class, SpringContextUtils.class})
+@Import({SpringContextUtils.class})
 @ConditionalOnClass({WsClient.class})
-@EnableConfigurationProperties({ WsClientProperties.class })
+@EnableConfigurationProperties({WsClientProperties.class})
 public class AutoConfiguration {
 
     private final WsClientProperties wsClientProperties;
-    private final URI uri;
 
-    public AutoConfiguration(WsClientProperties wsClientProperties, URI uri){
+    public AutoConfiguration(WsClientProperties wsClientProperties) {
         this.wsClientProperties = wsClientProperties;
-        this.uri = uri;
     }
 
     @Bean
     @ConditionalOnMissingBean(WsClient.class)
-    public WsClient wsClient() {
-        return new WsClient(uri, wsClientProperties);
+    public WsClient wsClient() throws URISyntaxException {
+        URI uri = new URI(wsClientProperties.getWebSocketServerUri());
+        Long reconnectTime = wsClientProperties.getReconnectTime();
+        return reconnectTime != null ? new WsClient(uri, wsClientProperties.getReflectionPath(), reconnectTime) : new WsClient(uri, wsClientProperties.getReflectionPath());
     }
 
 

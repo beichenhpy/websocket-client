@@ -15,7 +15,7 @@ public class WsClientProperties {
     /**
      * 重连时间间隔 cron表达式
      */
-    private long reconnectTime;
+    private Long reconnectTime;
     /**
      * 反射搜索路径
      */
@@ -25,11 +25,11 @@ public class WsClientProperties {
      */
     private String webSocketServerUri;
 
-    public long getReconnectTime() {
+    public Long getReconnectTime() {
         return reconnectTime;
     }
 
-    public void setReconnectTime(long reconnectTime) {
+    public void setReconnectTime(Long reconnectTime) {
         this.reconnectTime = reconnectTime;
     }
 
