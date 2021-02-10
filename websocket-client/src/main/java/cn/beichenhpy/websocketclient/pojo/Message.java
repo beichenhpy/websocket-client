@@ -5,42 +5,37 @@ import java.io.Serializable;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * @description TODO 服务端消息类，根据这个反序列化
  * @since 2021/1/15 16:39
  */
 public class Message implements Serializable {
+    /**
+     * 发消息人
+     */
     private String fromUser;
+    /**
+     * 收消息人
+     */
     private String toUser;
-    private String path;
-    private SocketResult<?> socketResult;
-    private SocketQuery query;
+    /**
+     * 消息内容
+     */
+    private String content;
+    /**
+     * 消息类型
+     */
+    private String msgType;
 
-    public Message(String fromUser, String toUser, String path, SocketResult<?> socketResult, SocketQuery query) {
+    public Message(String fromUser, String toUser, String content, String msgType) {
         this.fromUser = fromUser;
         this.toUser = toUser;
-        this.path = path;
-        this.socketResult = socketResult;
-        this.query = query;
+        this.content = content;
+        this.msgType = msgType;
     }
 
     public Message() {
     }
 
-    public SocketQuery getQuery() {
-        return query;
-    }
-
-    public void setQuery(SocketQuery query) {
-        this.query = query;
-    }
-
-    public void setPath(String path) {
-        this.path = path;
-    }
-
-    public String getPath() {
-        return path;
-    }
     public String getFromUser() {
         return fromUser;
     }
@@ -57,11 +52,29 @@ public class Message implements Serializable {
         this.toUser = toUser;
     }
 
-    public SocketResult<?> getSocketResult() {
-        return socketResult;
+    public String getContent() {
+        return content;
     }
 
-    public void setSocketResult(SocketResult<?> socketResult) {
-        this.socketResult = socketResult;
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public String getMsgType() {
+        return msgType;
+    }
+
+    public void setMsgType(String msgType) {
+        this.msgType = msgType;
+    }
+
+    @Override
+    public String toString() {
+        return "Message{" +
+                "fromUser='" + fromUser + '\'' +
+                ", toUser='" + toUser + '\'' +
+                ", content='" + content + '\'' +
+                ", msgType='" + msgType + '\'' +
+                '}';
     }
 }

@@ -27,7 +27,7 @@ public class WebSocketBasicServer {
     @BeforeHandshake
     public void handshake(Session session, HttpHeaders headers, @RequestParam String req, @RequestParam MultiValueMap reqMap, @PathVariable String arg, @PathVariable Map pathMap){
         session.setSubprotocols("stomp");
-        if (!"ok".equals(req)){
+        if (!"yes".equals(req)){
             log.error("授权失败");
             session.close();
         }

@@ -1,4 +1,4 @@
-package cn.beichenhpy.websocketclient.pojo;
+package cn.beichenhpy.websocketclient.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -11,17 +11,26 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @ConfigurationProperties(prefix = "ws-client")
-public class WsClientYmlConfig {
-    private String heartbeat;
+public class WsClientProperties {
+    /**
+     * 重连时间间隔 cron表达式
+     */
+    private Long reconnectTime;
+    /**
+     * 反射搜索路径
+     */
     private String reflectionPath;
+    /**
+     * webSocketServer连接
+     */
     private String webSocketServerUri;
 
-    public String getHeartbeat() {
-        return heartbeat;
+    public Long getReconnectTime() {
+        return reconnectTime;
     }
 
-    public void setHeartbeat(String heartbeat) {
-        this.heartbeat = heartbeat;
+    public void setReconnectTime(Long reconnectTime) {
+        this.reconnectTime = reconnectTime;
     }
 
     public String getReflectionPath() {

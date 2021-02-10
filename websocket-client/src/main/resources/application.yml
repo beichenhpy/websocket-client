@@ -1,7 +1,0 @@
-server:
-  port: 8888
-
-ws-client:
-  heartbeat: '0/50 * * * * ?'
-  reflection-path: 'cn.beichenhpy'
-  web-socket-server-uri: 'ws://localhost:9999/beichenhpy/ws/backend?req=ok'

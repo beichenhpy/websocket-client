@@ -1,0 +1,4 @@
+ws-client:
+  reflection-path: 'com.example' #注解需要扫描的目录
+  web-socket-server-uri: 'ws://localhost:9999/beichenhpy/ws/backend' #websocketServerUri
+  reconnect-time: 5000
