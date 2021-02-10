@@ -33,7 +33,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
-    public final ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
+    protected final ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
 
     /**
      * 是否扫描过
@@ -42,7 +42,7 @@ public class WsClient extends WebSocketClient {
     /**
      * 线程池
      */
-    private  TaskExecutor taskExecutor;
+    private TaskExecutor taskExecutor;
     /**
      * 反射路径
      */
