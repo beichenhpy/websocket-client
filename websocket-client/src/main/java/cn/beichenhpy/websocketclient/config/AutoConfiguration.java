@@ -19,23 +19,8 @@ import java.net.URISyntaxException;
  */
 @Configuration
 @Import({SpringContextUtils.class})
-@ConditionalOnClass({WsClient.class})
 @EnableConfigurationProperties({WsClientProperties.class})
 public class AutoConfiguration {
-
-    private final WsClientProperties wsClientProperties;
-
-    public AutoConfiguration(WsClientProperties wsClientProperties) {
-        this.wsClientProperties = wsClientProperties;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean(WsClient.class)
-    public WsClient wsClient() throws URISyntaxException {
-        URI uri = new URI(wsClientProperties.getWebSocketServerUri());
-        Long reconnectTime = wsClientProperties.getReconnectTime();
-        return reconnectTime != null ? new WsClient(uri, wsClientProperties.getReflectionPath(), reconnectTime) : new WsClient(uri, wsClientProperties.getReflectionPath());
-    }
 
 
 }

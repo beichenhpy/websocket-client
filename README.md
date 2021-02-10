@@ -32,3 +32,29 @@ ws-client:
   reflection-path: 'cn.beichenhpy' #注解需要扫描的目录
   web-socket-server-uri: 'ws://localhost:9999/beichenhpy/ws/backend?req=ok' #websocketServerUri
 ```
+### WsClient使用说明
+本第三方jar包不提供WsClient的bean，由于能力问题，无法处理一些自定义，因此需要手动注册bean
+```java
+@Configuration
+public class MyWsClient {
+    //注入配置类
+    private final WsClientProperties wsClientProperties;
+    public MyWsClient(WsClientProperties wsClientProperties){
+        this.wsClientProperties = wsClientProperties;
+    }
+
+    /**
+     * 注入WsClient 可以进行一些生成token之类的
+     * @return WsClient
+     * @throws URISyntaxException URI转换异常
+     */
+    @Bean
+    public WsClient wsClient() throws URISyntaxException {
+        String webSocketServerUri = wsClientProperties.getWebSocketServerUri();
+        String token = "?req=yes";
+        String newUri = webSocketServerUri + token;
+        return new WsClient(new URI(newUri),wsClientProperties.getReflectionPath(),wsClientProperties.getReconnectTime());
+    }
+
+}
+```
