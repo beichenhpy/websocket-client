@@ -133,7 +133,7 @@ public class WsClient extends WebSocketClient {
         String path = content.getPath();
         MsgQuery query = content.getMsgQuery();
         //取出反射
-        findMethodAndInvokePara(path,query);
+        findMethodAndInvoke(path,query);
         log.info("[websocket] 收到消息={}", message);
 
     }
