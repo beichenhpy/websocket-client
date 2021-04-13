@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author beichenhpy
- * @version 1.0
- * @description TODO
- * @since 2021/1/21 13:46
+ * @version 0.2
+ * <p>用于实现在{@code application.yml}的自动提示
+ * @since 2021/1/21 13:46 -update 2021/4/13
  */
 @Component
 @ConfigurationProperties(prefix = "ws-client")

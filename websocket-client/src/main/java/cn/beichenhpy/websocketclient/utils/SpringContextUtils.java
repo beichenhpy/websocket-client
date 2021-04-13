@@ -23,7 +23,7 @@ public class SpringContextUtils implements ApplicationContextAware {
 	/**
 	 * 获取applicationContext
 	 *
-	 * @return
+	 * @return 返回上下文
 	 */
 	public static ApplicationContext getApplicationContext() {
 		return applicationContext;
@@ -34,8 +34,8 @@ public class SpringContextUtils implements ApplicationContextAware {
 	/**
 	 * 通过name获取 Bean.
 	 *
-	 * @param name
-	 * @return
+	 * @param name 名字
+	 * @return bean对象
 	 */
 	public static Object getBean(String name) {
 		return getApplicationContext().getBean(name);
@@ -44,9 +44,9 @@ public class SpringContextUtils implements ApplicationContextAware {
 	/**
 	 * 通过class获取Bean.
 	 *
-	 * @param clazz
-	 * @param       <T>
-	 * @return
+	 * @param clazz 类
+	 * @param <T> 为了让静态方法可以使用泛型
+	 * @return 返回bean
 	 */
 	public static <T> T getBean(Class<T> clazz) {
 		return getApplicationContext().getBean(clazz);
@@ -55,10 +55,10 @@ public class SpringContextUtils implements ApplicationContextAware {
 	/**
 	 * 通过name,以及Clazz返回指定的Bean
 	 *
-	 * @param name
-	 * @param clazz
-	 * @param       <T>
-	 * @return
+	 * @param name bean名字
+	 * @param clazz 类
+	 * @param  <T> 为了让静态方法可以使用泛型
+	 * @return 返回bean
 	 */
 	public static <T> T getBean(String name, Class<T> clazz) {
 		return getApplicationContext().getBean(name, clazz);

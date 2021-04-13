@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 服务端消息类，根据这个反序列化
+ * 服务端消息类，根据这个反序列化
  * @since 2021/1/15 16:39
  */
 public class Message implements Serializable {

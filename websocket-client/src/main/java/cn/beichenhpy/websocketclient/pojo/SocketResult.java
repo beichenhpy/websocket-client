@@ -8,7 +8,7 @@ import java.io.Serializable;
 /**
  * @author beichenhpy
  * @since 2021-1-15
- * @description TODO 查询结果实体类 可自行修改
+ * 查询结果实体类 可自行修改
  */
 public class SocketResult<T> implements Serializable {
 

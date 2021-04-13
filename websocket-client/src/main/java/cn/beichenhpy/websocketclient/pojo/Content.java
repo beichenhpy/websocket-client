@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO
+ * 具体的传输内容
  * @since 2021/1/22 10:15
  */
 public class Content implements Serializable {

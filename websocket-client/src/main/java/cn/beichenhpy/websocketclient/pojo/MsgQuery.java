@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * @author beichenhpy
  * @version 1.0
- * @description TODO 查询条件 queryContent需要根据queryType进行反序列化
+ * 查询条件 queryContent需要根据queryType进行反序列化
  * @since 2021/1/22 10:08
  */
 public class MsgQuery implements Serializable {
