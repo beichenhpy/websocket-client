@@ -34,9 +34,11 @@ import java.util.concurrent.atomic.AtomicReference;
  * <p>在{@link #onOpen}中方法中，实现了对所有的{@link SocketMapping} 的注解的<var>path</var>和对应的<var>Method</var>
  * 进行注册，到变量{@code pathToMethodMap}中保存，具体实现，使用{@link Reflections} 新建反射，扫描所有的该注解的方法
  * <p>在{@link #onMessage} 方法中，进行传回值得解析，{@link Message}
- * <p>----------------------------待添加用户自定义------------------------------
- * <p>方法{@link #findMethodAndInvoke(String, MsgQuery)}为根据path查询并反射调用方法-单线程
- * <p> 在{@link #onClose} 方法中，添加了失败后，多线程重试，通过 {@link #reconnect()}方法进行重试
+ * <p>内部类{@link CastUtils#cast(Object)} 用于强制转换，
+ * 参考 <a href="https://github.com/spring-projects/spring-data-commons/blob/master/src/main/java/org/springframework/data/util/CastUtils.java">CastUtils</a>
+ * <p>方法{@link #findMethodAndInvoke(String, MsgQuery)}为根据path查询并反射调用方法
+ * <p>在{@link #onClose} 方法中，添加了失败后，多线程重试，通过 {@link #reconnect()}方法进行重试
+ * <p>{@link #sendToCenter(Object, Message)} 将执行结果发送回消息中心
  * @see SocketMapping
  * @see Reflections
  * @see Message
