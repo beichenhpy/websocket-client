@@ -11,7 +11,7 @@ import java.io.Serializable;
 public class Content implements Serializable {
     private String path;
     private MsgQuery msgQuery;
-    private SocketResult<?> socketResult;
+    private SocketResult socketResult;
 
     public String getPath() {
         return path;
@@ -29,11 +29,11 @@ public class Content implements Serializable {
         this.msgQuery = msgQuery;
     }
 
-    public SocketResult<?> getSocketResult() {
+    public SocketResult getSocketResult() {
         return socketResult;
     }
 
-    public void setSocketResult(SocketResult<?> socketResult) {
+    public void setSocketResult(SocketResult socketResult) {
         this.socketResult = socketResult;
     }
 }

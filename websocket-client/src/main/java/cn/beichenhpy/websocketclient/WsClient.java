@@ -4,6 +4,7 @@ import cn.beichenhpy.websocketclient.anno.SocketMapping;
 import cn.beichenhpy.websocketclient.pojo.Content;
 import cn.beichenhpy.websocketclient.pojo.Message;
 import cn.beichenhpy.websocketclient.pojo.MsgQuery;
+import cn.beichenhpy.websocketclient.pojo.SocketResult;
 import cn.beichenhpy.websocketclient.utils.SpringContextUtils;
 import com.alibaba.fastjson.JSON;
 import org.java_websocket.client.WebSocketClient;
@@ -15,6 +16,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.util.Assert;
+import org.springframework.util.ObjectUtils;
 
 import java.lang.reflect.Method;
 import java.net.URI;
@@ -22,6 +25,7 @@ import java.util.Arrays;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * @author beichenhpy
@@ -32,7 +36,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  * <p>在{@link #onMessage} 方法中，进行传回值得解析，{@link Message}
  * <p>----------------------------待添加用户自定义------------------------------
  * <p>方法{@link #findMethodAndInvoke(String, MsgQuery)}为根据path查询并反射调用方法-单线程
- * <p>方法{@link #findMethodAndInvokePara(String, MsgQuery)} 为根据path查询并反射调用方法-并行
  * <p> 在{@link #onClose} 方法中，添加了失败后，多线程重试，通过 {@link #reconnect()}方法进行重试
  * @see SocketMapping
  * @see Reflections
@@ -125,30 +128,22 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
+        log.info("[websocket] 收到消息={}", message);
         //解析传送Message
         Message msg = JSON.parseObject(message, Message.class);
+        Assert.notNull(message,"message must not be null");
         //拿到content
         Content content = JSON.parseObject(msg.getContent(), Content.class);
+        Assert.notNull(content,"content must not be null");
         //拿到路径和query条件
         String path = content.getPath();
         MsgQuery query = content.getMsgQuery();
         //取出反射
-        findMethodAndInvoke(path,query);
-        log.info("[websocket] 收到消息={}", message);
-
-    }
-
-    /**
-     * 并行寻找对应Method
-     * @param path mapping映射路径
-     * @param query 查询条件
-     */
-    private void findMethodAndInvokePara(String path,MsgQuery query){
-        pathToMethodMap.forEachKey(1, strings -> {
-            if (Arrays.asList(strings).contains(path)){
-                invokeMethod(strings, query);
-            }
-        });
+        Object result = findMethodAndInvoke(path, query);
+        if (result != null){
+            //发送到消息中心
+            sendToCenter(result,msg);
+        }
     }
 
 
@@ -157,14 +152,16 @@ public class WsClient extends WebSocketClient {
      * @param path 方法对应的mapping
      * @param query 查询条件
      */
-    private void findMethodAndInvoke(String path,MsgQuery query){
+    private Object findMethodAndInvoke(String path,MsgQuery query){
         ConcurrentHashMap.KeySetView<String[], Method> keySetView = pathToMethodMap.keySet();
+        Object result = null;
         for (String[] paths : keySetView) {
             if (Arrays.asList(paths).contains(path)){
-                invokeMethod(paths, query);
+                result = invokeMethod(paths, query);
                 break;
             }
         }
+        return result;
     }
 
     /**
@@ -172,7 +169,8 @@ public class WsClient extends WebSocketClient {
      * @param paths 获取方法
      * @param query 查询条件
      */
-    private void invokeMethod(String[] paths, MsgQuery query) {
+    private Object invokeMethod(String[] paths, MsgQuery query) {
+        Object result = null;
         Method method = pathToMethodMap.get(paths);
         try {
             Class<?> declaringClass = method.getDeclaringClass();
@@ -180,22 +178,23 @@ public class WsClient extends WebSocketClient {
             Object bean = SpringContextUtils.getBean(declaringClass);
             //反射
             if (query == null){
-                method.invoke(bean);
+                result = method.invoke(bean);
             }else {
-                method.invoke(bean,query);
+                result = method.invoke(bean, query);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return result;
     }
     @Override
     public void onClose(int code, String reason, boolean remote) {
         log.info("[websocket] 退出连接，code:{},reason:{},remote:{}",code,reason,remote );
         if (code == CloseFrame.NEVER_CONNECTED){
-            log.warn("【webSocket】连接失败----服务器拒绝连接，请检查服务器连接配置或服务器是否存在");
+            log.warn("[webSocket]连接失败----服务器拒绝连接，请检查服务器连接配置或服务器是否存在");
         }
         if (code == CloseFrame.ABNORMAL_CLOSE){
-            log.warn("【webSocket】退出连接----服务器主动关闭连接，请检查WebSocket服务器运行是否正常");
+            log.warn("[webSocket]退出连接----服务器主动关闭连接，请检查WebSocket服务器运行是否正常");
         }
         taskExecutor.execute(this::reconnect);
         try {
@@ -209,4 +208,37 @@ public class WsClient extends WebSocketClient {
     public void onError(Exception ex) {
         log.info("[websocket] 连接错误={},",ex.toString());
     }
+
+    /**
+     * 将执行结果发送给消息中心 转发
+     * @param result 结果
+     * @param message 消息
+     */
+    public void sendToCenter(Object result,Message message){
+        //转换
+        SocketResult socketResult = CastUtils.cast(result);
+        //设置内容
+        Content content= JSON.parseObject(message.getContent(), Content.class);
+        content.setSocketResult(socketResult);
+        message.setContent(JSON.toJSONString(content));
+        //互换发送方
+        message.setFromUser(message.getToUser());
+        message.setToUser(message.getFromUser());
+        //发送
+        this.send(JSON.toJSONString(message));
+    }
+
+   public interface CastUtils{
+       /**
+        * 转换
+        * @param object source
+        * @param <T> target
+        * @return target
+        */
+       @SuppressWarnings("unchecked")
+       static <T> T cast(Object object) {
+           return (T) object;
+       }
+   }
+
 }
