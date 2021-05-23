@@ -38,7 +38,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @see SocketMapping
  * @see Reflections
  * @see Message
- * @since 2021/1/15 15:28 -update 2021/4/13
+ * @since 2021/1/15 15:28 -update 2021/5/23
  */
 public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
@@ -111,7 +111,7 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake serverHandshake) {
-        log.info("[websocket] 连接成功");
+        log.info("[websocket] connect success");
         //执行扫描
         if (!isScanned){
             Reflections reflections = new Reflections(reflectionPath,new MethodAnnotationsScanner());
@@ -126,7 +126,6 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onMessage(String message) {
-        log.info("[websocket] 收到消息={}", message);
         //解析传送Message
         Message msg = JSON.parseObject(message, Message.class);
         Assert.notNull(message,"message must not be null");
@@ -189,10 +188,10 @@ public class WsClient extends WebSocketClient {
     public void onClose(int code, String reason, boolean remote) {
         log.info("[websocket] 退出连接，code:{},reason:{},remote:{}",code,reason,remote );
         if (code == CloseFrame.NEVER_CONNECTED){
-            log.warn("[webSocket]连接失败----服务器拒绝连接，请检查服务器连接配置或服务器是否存在");
+            log.warn("[webSocket]connect has refused----check url is available");
         }
         if (code == CloseFrame.ABNORMAL_CLOSE){
-            log.warn("[webSocket]退出连接----服务器主动关闭连接，请检查WebSocket服务器运行是否正常");
+            log.warn("[webSocket] exit connection----websocket server has closed");
         }
         taskExecutor.execute(this::reconnect);
         try {
@@ -204,7 +203,7 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onError(Exception ex) {
-        log.info("[websocket] 连接错误={},",ex.toString());
+        log.info("[websocket] connection error={},",ex.toString());
     }
 
     /**
