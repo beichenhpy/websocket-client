@@ -34,27 +34,48 @@ ws-client:
 ```
 ### WsClient使用说明
 本第三方jar包不提供WsClient的bean，由于能力问题，无法处理一些自定义，因此需要手动注册bean
-```java
-@Configuration
-public class MyWsClient {
-    //注入配置类
-    private final WsClientProperties wsClientProperties;
-    public MyWsClient(WsClientProperties wsClientProperties){
-        this.wsClientProperties = wsClientProperties;
-    }
 
-    /**
-     * 注入WsClient 可以进行一些生成token之类的
-     * @return WsClient
-     * @throws URISyntaxException URI转换异常
-     */
+```java
+import cn.beichenhpy.websocketclient.config.WsClientProperties;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import javax.annotation.Resource;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+/**
+ * @author beichenhpy
+ * @version 0.0.1
+ * @apiNote MyWsClient description：
+ * @since 2021/5/23 9:37 下午
+ */
+@Configuration
+public class MyWsClient implements ApplicationContextAware {
+
+    private ApplicationContext applicationContext;
+    @Resource
+    private WsClientProperties wsClientProperties;
+
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
+    }
     @Bean
     public WsClient wsClient() throws URISyntaxException {
         String webSocketServerUri = wsClientProperties.getWebSocketServerUri();
         String token = "?req=yes";
         String newUri = webSocketServerUri + token;
-        return new WsClient(new URI(newUri),wsClientProperties.getReflectionPath(),wsClientProperties.getReconnectTime());
+        return new WsClient(
+                new URI(newUri),
+                wsClientProperties.getReflectionPath(),
+                wsClientProperties.getReconnectTime(),
+                applicationContext
+        );
     }
-
 }
 ```
