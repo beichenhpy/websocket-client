@@ -5,7 +5,6 @@ import cn.beichenhpy.websocketclient.pojo.Content;
 import cn.beichenhpy.websocketclient.pojo.Message;
 import cn.beichenhpy.websocketclient.pojo.MsgQuery;
 import cn.beichenhpy.websocketclient.pojo.SocketResult;
-import cn.beichenhpy.websocketclient.utils.SpringContextUtils;
 import com.alibaba.fastjson.JSON;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
@@ -14,6 +13,9 @@ import org.reflections.Reflections;
 import org.reflections.scanners.MethodAnnotationsScanner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
@@ -44,6 +46,24 @@ public class WsClient extends WebSocketClient {
     private static final Logger log = LoggerFactory.getLogger(WsClient.class);
     protected final ConcurrentHashMap<String[], Method> pathToMethodMap = new ConcurrentHashMap<>();
 
+    /**----setter方法设置值----*/
+    public void setApplicationContext(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
+
+    public void setTaskExecutor(TaskExecutor taskExecutor) {
+        this.taskExecutor = taskExecutor;
+    }
+
+    public void setReconnectTime(Long reconnectTime) {
+        this.reconnectTime = reconnectTime;
+    }
+
+    /**
+     * 需要传入上下文为了获取bean
+     * todo:暂时未想到什么好方法代替
+     */
+    private ApplicationContext applicationContext;
     /**
      * 是否扫描过
      */
@@ -61,10 +81,11 @@ public class WsClient extends WebSocketClient {
      */
     private Long reconnectTime = 5000L;
 
-    public WsClient(URI uri,String reflectionPath,Long reconnectTime) {
+    public WsClient(URI uri,String reflectionPath,Long reconnectTime,ApplicationContext applicationContext) {
         super(uri);
         this.reconnectTime = reconnectTime;
         this.reflectionPath = reflectionPath;
+        this.applicationContext = applicationContext;
         //单例初始化线程池
         if (taskExecutor == null){
             synchronized (WsClient.class){
@@ -73,9 +94,10 @@ public class WsClient extends WebSocketClient {
         }
         this.connect();
     }
-    public WsClient(URI uri,String reflectionPath) {
+    public WsClient(URI uri,String reflectionPath,ApplicationContext applicationContext) {
         super(uri);
         this.reflectionPath = reflectionPath;
+        this.applicationContext = applicationContext;
         //单例初始化线程池
         if (taskExecutor == null){
             synchronized (WsClient.class){
@@ -167,12 +189,13 @@ public class WsClient extends WebSocketClient {
      * @param query 查询条件
      */
     private Object invokeMethod(String[] paths, MsgQuery query) {
+        Assert.notNull(applicationContext,"ApplicationContext must not be null");
         Object result = null;
         Method method = pathToMethodMap.get(paths);
         try {
             Class<?> declaringClass = method.getDeclaringClass();
             //拿到bean实例
-            Object bean = SpringContextUtils.getBean(declaringClass);
+            final Object bean = applicationContext.getBean(declaringClass);
             //反射
             if (query == null){
                 result = method.invoke(bean);
@@ -225,7 +248,7 @@ public class WsClient extends WebSocketClient {
         this.send(JSON.toJSONString(message));
     }
 
-   public interface CastUtils{
+    public interface CastUtils{
        /**
         * 转换
         * @param object source
