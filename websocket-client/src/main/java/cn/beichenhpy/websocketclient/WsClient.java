@@ -6,6 +6,7 @@ import cn.beichenhpy.websocketclient.pojo.Message;
 import cn.beichenhpy.websocketclient.pojo.MsgQuery;
 import cn.beichenhpy.websocketclient.pojo.SocketResult;
 import com.alibaba.fastjson.JSON;
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.framing.CloseFrame;
 import org.java_websocket.handshake.ServerHandshake;
@@ -23,8 +24,8 @@ import java.lang.reflect.Method;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
+
 /**
  * @author beichenhpy
  * @version 0.2
@@ -51,8 +52,8 @@ public class WsClient extends WebSocketClient {
         this.applicationContext = applicationContext;
     }
 
-    public void setTaskExecutor(TaskExecutor taskExecutor) {
-        this.taskExecutor = taskExecutor;
+    public void setTaskExecutor(ThreadPoolExecutor executor) {
+        this.executor = executor;
     }
 
     public void setReconnectTime(Long reconnectTime) {
@@ -69,9 +70,11 @@ public class WsClient extends WebSocketClient {
      */
     private static boolean isScanned = false;
     /**
-     * 线程池
+     * 线程池-
+     * 根据 Use reconnect in another thread to insure a successful cleanup
+     * 必须新建线程来执行 reconnect 不能使用本线程，因此使用比较优雅的方式去新建
      */
-    private TaskExecutor taskExecutor;
+    private ThreadPoolExecutor executor;
     /**
      * 反射路径
      */
@@ -87,9 +90,9 @@ public class WsClient extends WebSocketClient {
         this.reflectionPath = reflectionPath;
         this.applicationContext = applicationContext;
         //单例初始化线程池
-        if (taskExecutor == null){
+        if (executor == null){
             synchronized (WsClient.class){
-                taskExecutor = initThreadPool();
+                executor = initThreadPool();
             }
         }
         this.connect();
@@ -99,9 +102,9 @@ public class WsClient extends WebSocketClient {
         this.reflectionPath = reflectionPath;
         this.applicationContext = applicationContext;
         //单例初始化线程池
-        if (taskExecutor == null){
+        if (executor == null){
             synchronized (WsClient.class){
-                taskExecutor = initThreadPool();
+                executor = initThreadPool();
             }
         }
         this.connect();
@@ -109,26 +112,18 @@ public class WsClient extends WebSocketClient {
 
     /**
      * 初始化线程池
-     * @return TaskExecutor
+     * @return ThreadPoolExecutor
      */
-    private TaskExecutor initThreadPool(){
-        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        // 设置核心线程数
-        executor.setCorePoolSize(5);
-        // 设置最大线程数
-        executor.setMaxPoolSize(10);
-        // 设置队列容量
-        executor.setQueueCapacity(10);
-        // 设置线程活跃时间（秒）
-        executor.setKeepAliveSeconds(60);
-        // 设置默认线程名称
-        executor.setThreadNamePrefix("wsClient-reconnect-");
-        // 设置拒绝策略
-        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        // 等待所有任务结束后再关闭线程池
-        executor.setWaitForTasksToCompleteOnShutdown(true);
-        executor.initialize();
-        return executor;
+    private ThreadPoolExecutor initThreadPool(){
+        return new ThreadPoolExecutor(
+                5,
+                10,
+                60,
+                TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(),
+                new ThreadFactoryBuilder().build(),
+                new ThreadPoolExecutor.CallerRunsPolicy()
+        );
     }
 
     @Override
@@ -209,14 +204,13 @@ public class WsClient extends WebSocketClient {
     }
     @Override
     public void onClose(int code, String reason, boolean remote) {
-        log.info("[websocket] 退出连接，code:{},reason:{},remote:{}",code,reason,remote );
         if (code == CloseFrame.NEVER_CONNECTED){
             log.warn("[webSocket]connect has refused----check url is available");
         }
         if (code == CloseFrame.ABNORMAL_CLOSE){
             log.warn("[webSocket] exit connection----websocket server has closed");
         }
-        taskExecutor.execute(this::reconnect);
+        executor.execute(this::reconnect);
         try {
             Thread.sleep(reconnectTime);
         } catch (InterruptedException e) {
